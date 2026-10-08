@@ -11,3 +11,13 @@ def test_get_applications(db):
         apps = applications.get_applications()
         assert len(apps) == 2
         assert apps[1]["company"] == "Adidas" 
+
+def test_get_empty_applications(db):
+      apps = applications.get_applications()
+      assert len(apps) == 0
+
+def test_add_application_invalid_status(db):
+    with pytest.raises(ValueError):
+        applications.add_application(company="acme", role="consultant", applied_date="22/07/2002",status="testFail") 
+    apps = applications.get_applications()
+    assert len(apps) == 0
