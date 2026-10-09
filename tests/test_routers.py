@@ -59,3 +59,14 @@ def test_get_application_not_found(db):
     missing_id = 99999
     response = client.get(f"/applications/{missing_id}")
     assert response.status_code == 404
+    
+def test_patch_application_not_found(db):
+    missing_id = 99999
+    response = client.patch(f"/applications/{missing_id}", json={"status": "waiting"})
+    assert response.status_code == 404
+
+    
+def test_delete_application_not_found(db):
+    missing_id = 99999
+    response = client.delete(f"/applications/{missing_id}")
+    assert response.status_code == 404
