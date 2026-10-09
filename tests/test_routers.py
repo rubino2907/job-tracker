@@ -123,3 +123,35 @@ def test_delete_application_not_found(db):
     missing_id = 99999
     response = client.delete(f"/applications/{missing_id}")
     assert response.status_code == 404
+
+
+def test_get_applications_filtered_by_status(db):
+    rejected = make_application("Gama")
+    rejected["status"] = "rejected"
+    client.post("/applications", json=make_application("Acme"))
+    client.post("/applications", json=make_application("Beta"))
+    client.post("/applications", json=rejected)
+
+    response = client.get("/applications", params={"status": "waiting"})
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    for application in response.json():
+        assert application["status"] == "waiting"
+
+
+def test_get_applications_filtered_no_matches(db):
+    client.post("/applications", json=make_application())
+
+    response = client.get("/applications", params={"status": "offer"})
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_get_applications_filtered_invalid_status(db):
+    client.post("/applications", json=make_application())
+
+    response = client.get("/applications", params={"status": "fail"})
+
+    assert response.status_code == 422

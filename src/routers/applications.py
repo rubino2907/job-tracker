@@ -23,8 +23,8 @@ router = APIRouter(prefix="/applications", tags=["applications"])
 
 
 @router.get("")
-def get_applications():
-    return repository.get_applications()
+def get_applications(status: Status | None = None):
+    return repository.get_applications(status)
 
 
 @router.get("/{application_id}")
