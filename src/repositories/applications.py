@@ -2,11 +2,18 @@ from src import database
 from src.models import Status
 
 
-def get_applications():
+def get_applications(status=None):
     con = database.get_connection()
-    rows = con.execute(
-        "SELECT id, company, role, status, applied_date, notes FROM applications"
-    ).fetchall()
+    if status is None:
+        rows = con.execute(
+            "SELECT id, company, role, status, applied_date, notes FROM applications"
+        ).fetchall()
+    else:
+        status_value = Status(status).value
+        rows = con.execute(
+            "SELECT id, company, role, status, applied_date, notes FROM applications WHERE status = ?",
+            (status_value,),
+        ).fetchall()
     con.close()
     result = []
     for row in rows:

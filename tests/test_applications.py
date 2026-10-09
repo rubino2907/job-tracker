@@ -17,6 +17,16 @@ def test_get_applications(db):
     assert apps[1]["company"] == "Adidas"
 
 
+def test_get_applications_filtered_by_status(db):
+    applications.add_application("Acme", "Dev", "waiting", "2026-10-01")
+    applications.add_application("Beta", "Dev", "waiting", "2026-10-02")
+    applications.add_application("Gama", "Dev", "rejected", "2026-10-03")
+
+    apps = applications.get_applications("waiting")
+
+    assert len(apps) == 2
+
+
 def test_get_application_id_not_found(db):
     with pytest.raises(ValueError):
         applications.get_application(999999)
