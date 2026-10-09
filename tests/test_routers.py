@@ -54,3 +54,8 @@ def test_get_applications(db):
     assert response.status_code == 200
     assert len(response.json()) == 2
     assert response.json()[1]["company"] == "Closer Consult"
+
+def test_get_application_not_found(db):
+    missing_id = 99999
+    response = client.get(f"/applications/{missing_id}")
+    assert response.status_code == 404
