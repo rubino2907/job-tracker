@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Status(str, Enum):
     INTERVIEW_DONE = "interview_done"
     APPLIED = "applied"
