@@ -95,6 +95,13 @@ def test_patch_application(db):
     assert response.json()["status"] == "interview_scheduled"
 
 
+def test_patch_application_invalid_status(db):
+    created = client.post("/applications", json=make_application())
+    application_id = created.json()["id"]
+    response = client.patch(f"/applications/{application_id}", json={"status": "fail"})
+    assert response.status_code == 422
+
+
 def test_patch_application_not_found(db):
     missing_id = 99999
     response = client.patch(f"/applications/{missing_id}", json={"status": "waiting"})
