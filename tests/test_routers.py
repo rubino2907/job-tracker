@@ -85,9 +85,30 @@ def test_get_application_not_found(db):
     assert response.status_code == 404
 
 
+def test_patch_application(db):
+    created = client.post("/applications", json=make_application())
+    application_id = created.json()["id"]
+    response = client.patch(
+        f"/applications/{application_id}", json={"status": "interview_scheduled"}
+    )
+    assert response.status_code == 200
+    assert response.json()["status"] == "interview_scheduled"
+
+
 def test_patch_application_not_found(db):
     missing_id = 99999
     response = client.patch(f"/applications/{missing_id}", json={"status": "waiting"})
+    assert response.status_code == 404
+
+
+def test_delete_application(db):
+    created = client.post("/applications", json=make_application())
+    application_id = created.json()["id"]
+    response = client.delete(f"/applications/{application_id}")
+    assert response.status_code == 200
+    response = client.get(
+        f"/applications/{application_id}"
+    )  # novo pedido: a candidatura ainda existe?
     assert response.status_code == 404
 
 
