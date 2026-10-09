@@ -4,6 +4,15 @@ from src.main import app
 client = TestClient(app)
 
 
+def make_application(company="Acme"):
+    return {
+        "company": company,
+        "role": "Backend Developer",
+        "status": "waiting",
+        "applied_date": "2026-10-01",
+    }
+
+
 def test_create_application(db):
     company = "Acme"
     role = "Consultor Junior"
@@ -24,30 +33,33 @@ def test_create_application(db):
     assert response.json()["status"] == status
 
 
+def test_create_application_invalid_status(db):
+    body = make_application()
+    body["status"] = "fail"
+
+    response = client.post("/applications", json=body)
+
+    assert response.status_code == 422
+
+
+def test_create_application_invalid_date(db):
+    body = make_application()
+    body["applied_date"] = "10/12/2025"
+
+    response = client.post("/applications", json=body)
+
+    assert response.status_code == 422
+
+
 def test_get_applications_empty(db):
     response = client.get("/applications")
     assert response.status_code == 200
     assert response.json() == []
 
+
 def test_get_applications(db):
-    client.post(
-        "/applications",
-        json={
-            "company": "Acme",
-            "role": "Backend Developer",
-            "status": "waiting",
-            "applied_date": "2026-10-01",
-        },
-    )
-    client.post(
-        "/applications",
-        json={
-            "company": "Closer Consult",
-            "role": "Backend Developer",
-            "status": "waiting",
-            "applied_date": "2026-10-02",
-        },
-    )
+    client.post("/applications", json=make_application())
+    client.post("/applications", json=make_application("Closer Consult"))
 
     response = client.get("/applications")
 
@@ -55,17 +67,30 @@ def test_get_applications(db):
     assert len(response.json()) == 2
     assert response.json()[1]["company"] == "Closer Consult"
 
+
+def test_get_application(db):
+    first = client.post("/applications", json=make_application())
+    second = client.post("/applications", json=make_application("Closer Consult"))
+
+    application_id = second.json()["id"]
+    response = client.get(f"/applications/{application_id}")
+
+    assert response.status_code == 200
+    assert response.json()["company"] == "Closer Consult"
+
+
 def test_get_application_not_found(db):
     missing_id = 99999
     response = client.get(f"/applications/{missing_id}")
     assert response.status_code == 404
-    
+
+
 def test_patch_application_not_found(db):
     missing_id = 99999
     response = client.patch(f"/applications/{missing_id}", json={"status": "waiting"})
     assert response.status_code == 404
 
-    
+
 def test_delete_application_not_found(db):
     missing_id = 99999
     response = client.delete(f"/applications/{missing_id}")
