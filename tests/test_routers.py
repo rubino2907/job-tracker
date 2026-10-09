@@ -22,3 +22,35 @@ def test_create_application(db):
     assert response.json()["company"] == company
     assert response.json()["role"] == role
     assert response.json()["status"] == status
+
+
+def test_get_applications_empty(db):
+    response = client.get("/applications")
+    assert response.status_code == 200
+    assert response.json() == []
+
+def test_get_applications(db):
+    client.post(
+        "/applications",
+        json={
+            "company": "Acme",
+            "role": "Backend Developer",
+            "status": "waiting",
+            "applied_date": "2026-10-01",
+        },
+    )
+    client.post(
+        "/applications",
+        json={
+            "company": "Closer Consult",
+            "role": "Backend Developer",
+            "status": "waiting",
+            "applied_date": "2026-10-02",
+        },
+    )
+
+    response = client.get("/applications")
+
+    assert response.status_code == 200
+    assert len(response.json()) == 2
+    assert response.json()[1]["company"] == "Closer Consult"
